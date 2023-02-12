@@ -15,43 +15,36 @@ import com.eriklievaart.toolkit.io.api.StreamTool;
 import com.eriklievaart.toolkit.lang.api.ThrowableTool;
 import com.eriklievaart.toolkit.lang.api.collection.FromCollection;
 import com.eriklievaart.toolkit.lang.api.collection.ListTool;
-import com.eriklievaart.toolkit.vfs.api.VirtualFileScanner;
+import com.eriklievaart.toolkit.lang.api.str.Str;
+import com.eriklievaart.toolkit.logging.api.LogTemplate;
 
 public class Main {
+	private static final LogTemplate log = new LogTemplate(Main.class);
 
 	private static File destination = new File("/tmp/snuggle");
 
 	public static void main(String[] args) throws Exception {
-		if (args.length == 0) {
-			System.err.println("usage: snuggle -v [file]...");
-			return;
-		}
 		if (destination.exists()) {
 			destination.delete();
 		}
 		long start = System.currentTimeMillis();
 		run(args);
 		long spent = System.currentTimeMillis() - start;
-		System.out.println("time spent rendering: " + spent + "ms");
+		log.info("time spent rendering: " + spent + "ms");
 	}
 
 	private static void run(String[] args) throws IOException {
 		List<String> argList = FromCollection.toList(args);
-		if (argList.get(0).equals("-v")) {
+		if (args.length > 0 && argList.get(0).equals("-v")) {
 			System.setProperty("verbose", "true");
 			argList.remove(0);
 		}
 		try {
-			render(argList.size() == 0 ? last() : convertToFiles(argList));
+			render(argList.size() == 0 ? Remember.getLast() : convertToFiles(argList));
 		} catch (Exception e) {
 			FileTool.writeStringToFile("<pre>" + ThrowableTool.toString(e) + "</pre>", destination);
 		}
 		push(destination);
-	}
-
-	private static List<File> last() {
-		File root = new File("/home/eazy/Development/git/cheat/drive/hasselt/twis-3370/opgaven");
-		return new VirtualFileScanner(root).restrictFileExtensionsTo("latex").collectAsFileList();
 	}
 
 	private static void render(List<File> files) throws IOException {
@@ -59,12 +52,14 @@ public class Main {
 
 		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			for (File file : files) {
-				System.out.println(file);
+				log.info("rendering file: $", file);
+				out.writeBytes(Str.sub("<h1>$</h1>\n", file.getName()).getBytes());
 				String processed = new PreProcessor().process(FileTool.toString(file));
 				snuggle.render(processed, out);
 			}
 			FileTool.writeStringToFile(new PostProcessor().process(out.toString()), destination);
 		}
+		Remember.storeLast(files);
 	}
 
 	private static void push(File file) throws IOException {
@@ -79,8 +74,8 @@ public class Main {
 		StreamTool.writeString("file=" + file.getPath(), con.getOutputStream());
 
 		int responseCode = con.getResponseCode();
-		System.out.println("POST URL : " + url + " status " + responseCode);
-		System.out.println(StreamTool.toString(con.getInputStream()));
+		log.info("POST URL: " + url + " status " + responseCode);
+		log.info("response: " + StreamTool.toString(con.getInputStream()));
 	}
 
 	private static List<File> convertToFiles(List<String> paths) {
