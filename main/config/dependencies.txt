@@ -1,0 +1,11 @@
+
+[compile]
+toolkit @local @snapshot
+snuggletex-core net.sourceforge.jscl-meditor 1.2.2
+snuggletex-jeuclid de.rototor.snuggletex 1.3.0
+snuggletex-upconversion de.rototor.snuggletex 1.3.0
+
+[test]
+assertj-core org.assertj 3.10.0
+junit junit 4.7
+

@@ -1,0 +1,4 @@
+π=\pi
+σ=\sigma
+θ=\theta
+√=\sqrt
