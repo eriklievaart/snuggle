@@ -20,14 +20,14 @@ public class PreProcessor {
 		Map<String, String> replace = parseReplaceMap();
 
 		if (SystemProperties.getBoolean("verbose")) {
-			log.debug("PreProcessor input: <<<" + input + ">>>");
+			log.debug("PreProcessor input: <<<" + input.trim() + ">>>");
 		}
 		processMathMode(builder);
 		for (int i = 0; i < builder.length(); i++) {
 			substitute(builder, i, replace);
 		}
 		if (SystemProperties.getBoolean("verbose")) {
-			log.debug("PreProcessor output: <<<" + builder + ">>>");
+			log.debug("PreProcessor output: <<<" + builder.toString().trim() + ">>>");
 		}
 		return builder.toString();
 	}

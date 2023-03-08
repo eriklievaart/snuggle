@@ -20,7 +20,7 @@ public class SnuggleWrapper {
 
 	private SnuggleEngine engine = new SnuggleEngine();
 
-	public void render(String processed, ByteArrayOutputStream out) throws IOException {
+	public void render(String input, ByteArrayOutputStream out) throws IOException {
 		WebPageOutputOptions options = WebPageOutputOptionsTemplates.createWebPageOptions(WebPageType.MOZILLA);
 		options.setAddingTitleHeading(true);
 		options.setIndenting(true);
@@ -28,7 +28,8 @@ public class SnuggleWrapper {
 		options.setIncludingStyleElement(false);
 
 		SnuggleSession session = engine.createSession();
-		session.parseInput(new SnuggleInput(processed));
+		System.out.println(input);
+		session.parseInput(new SnuggleInput(input));
 
 		session.writeWebPage(options, new BufferedOutputStream(out), EndOutputAction.DO_NOTHING);
 		for (InputError error : session.getErrors()) {
